@@ -1,12 +1,16 @@
 # ArDNSPod
 
+This is the special version for openwrt/LEDE
+
 基于DNSPod用户API实现的纯Shell动态域名客户端，适配网卡地址。
 
 # Usage
 
-复制`dns.conf.example`到同一目录下的`dns.conf`并根据你的配置修改即可。
+~~复制`dns.conf.example`到同一目录下的`dns.conf`并根据你的配置修改即可。~~
+Copy `dns.conf.example` to the folder of `/etc/ddns/dns.conf`, and Modify your configuration with the following rules.
 
-执行时直接运行`ddnspod.sh`，支持cron任务。
+执行时直接运行`ddnspod.sh`，支持cron任务 & DDNS.
+
 
 配置文件格式：
 ```
@@ -23,6 +27,9 @@ arDdnsCheck "test.org" "subdomain"
 ```
 
 # 最近更新
+
+2017/12/08
+- create branch for openwrt
 
 2015/2/24
 - 增加token鉴权方式 (by wbchn)
@@ -43,4 +50,4 @@ arDdnsCheck "test.org" "subdomain"
 
 Original: anrip
 
-This version maintained by ProfFan
+This version maintained by JemyZhang

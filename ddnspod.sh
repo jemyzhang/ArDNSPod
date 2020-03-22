@@ -8,6 +8,13 @@
 #################################################
 
 arIpAddress() {
+wan_ip=$(curl ip.cip.cc -s --max-time 30) || {
+  echo "get ip address timeout"
+  exit 1
+}
+  echo $wan_ip
+  return 0
+
   local extip
   extip=$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')
   if [ "x${extip}" = "x" ]; then
@@ -80,11 +87,11 @@ arDdnsUpdate() {
   local domainID recordID recordRS recordCD recordIP myIP
   # Get domain ID
   domainID=$(arApiPost "Domain.Info" "domain=${1}")
-  domainID=$(echo $domainID | sed 's/.*{"id":"\([0-9]*\)".*/\1/')
+  domainID=$(echo $domainID | jsonfilter -e '@.domain.id')
 
   # Get Record ID
   recordID=$(arApiPost "Record.List" "domain_id=${domainID}&sub_domain=${2}")
-  recordID=$(echo $recordID | sed 's/.*\[{"id":"\([0-9]*\)".*/\1/')
+  recordID=$(echo $recordID | jsonfilter -e '@.records[0].id')
 
   # Update IP
   myIP=$(arIpAddress)
@@ -92,8 +99,8 @@ arDdnsUpdate() {
     return 1
   fi
   recordRS=$(arApiPost "Record.Ddns" "domain_id=${domainID}&record_id=${recordID}&sub_domain=${2}&record_type=A&value=${myIP}&record_line=%e9%bb%98%e8%ae%a4")
-  recordCD=$(echo $recordRS | sed 's/.*{"code":"\([0-9]*\)".*/\1/')
-  recordIP=$(echo $recordRS | sed 's/.*,"value":"\([0-9\.]*\)".*/\1/')
+  recordCD=$(echo $recordRS | jsonfilter -e '@.status.code')
+  recordIP=$(echo $recordRS | jsonfilter -e '@.record.value')
 
   # Output IP
   if [ "$recordIP" = "$myIP" ]; then
@@ -102,7 +109,7 @@ arDdnsUpdate() {
       return 0
     fi
     # Echo error message
-    echo $recordRS | sed 's/.*,"message":"\([^"]*\)".*/\1/'
+    echo $recordRS | jsonfilter -e '@.status.message'
     return 1
   else
     echo "Update Failed! Please check your network."
@@ -149,3 +156,5 @@ arDdnsCheck() {
 #done
 
 . $DIR/dns.conf
+
+return $?
